@@ -1,7 +1,7 @@
-_addon.name = 'Updatetest'
+_addon.name = 'NyzulBuddy'
 _addon.author = 'Darkdoom'
-_addon.version = '0.0.1a'
-_addon.command = 'update'
+_addon.version = '1.9.25.2019a'
+_addon.command = 'nb'
 _addon.commands = {'start', 'stop', 'help'}
 _addon.language = 'english'
 
@@ -18,7 +18,7 @@ texts       = require 'texts'
               require 'logger'
 config		= require('config')
 
-
+-- create default settings file for textbox
 
 default_settings = {}
 default_settings.pos = {}
@@ -38,15 +38,25 @@ default_settings.bg.green = 109
 default_settings.bg.blue = 166
 settings = config.load('data\\settings.xml',default_settings)
 
+--lamps table
+
+lamps = {}
+lamps[724] = {}
+lamps[725] = {}
+lamps[726] = {}
+lamps[727] = {}
+lamps[728] = {} --728 and 729 are currently unused until I can acquire 5th lamp ID/Index.
+lamps[729] = {}
+		
 
 
 text_box = texts.new(settings)
 
-	running = false
+	running = true
 	
 
---change to new floor message/exiting for running/not	
-
+	
+	--just ignore this
 function check_incoming_text(original)
 	local org = original:lower()
 	
@@ -57,16 +67,19 @@ function check_incoming_text(original)
 		end
 end
 
---requests entity update packets for Runic Lamps, need to add 0x2D8 and possibly 0x2D9 depending on max lamp spawns
+--Run packet injection/force update from server on NPC
+
 function update()
 
     if running == true then
-    ids    = {0x2D4, 0x2D5, 0x2D6, 0x2D7}
+    ids    = {0x2D4, 0x2D5, 0x2D6, 0x2D7, 0x2D8, 0x2D9}
     L1 = 0x2D4
 	L2 = 0x2D5 
 	L3 = 0x2D6
 	L4 = 0x2D7
-  print("Building")
+	L5 = 0x2D8
+	
+
     
         local p = packets.new('outgoing', 0x016, {
             ['Target Index'] = L1
@@ -80,48 +93,51 @@ function update()
 		local p4 = packets.new('outgoing', 0x016, {
 			['Target Index'] = L4
 			})
-  print("Injecting!")
+
   packets.inject(p)
   packets.inject(p2)
   packets.inject(p3)
   packets.inject(p4)
-  print("Successful")
-  coroutine.sleep(10)
+
+  coroutine.sleep(5)
   update()
+  
 end
 
 end
-  --command handler pasted from unm addon, needs to be updated/removed in favor of zone specific logic
-    function unm_command(...)
+  
+  --Handles commands
+
+    function nb_command(...)
 	if #arg > 3 then
-		windower.add_to_chat(167, 'Invalid command. //update help for valid options.')
+		windower.add_to_chat(167, 'Invalid command. //nb help for valid options.')
 	elseif #arg == 1 and arg[1]:lower() == 'start' then
 		if running == false then
 			running = true
-			windower.add_to_chat(200, 'Update start')
+			windower.add_to_chat(200, 'NyzulBuddy starting')
 			update()
 		else
-			windower.add_to_chat(200, 'UNM is already running.')
+			windower.add_to_chat(200, 'NyzulBuddy is already running.')
 		end
 	elseif #arg == 1 and arg[1]:lower() == 'stop' then
 		if running == true then
 			running = false
-			windower.add_to_chat(200, 'UNM - STOP')
+			windower.add_to_chat(200, 'NyzulBuddy stopping')
 		else
-			windower.add_to_chat(200, 'UNM is not running.')
+			windower.add_to_chat(200, 'NyzulBuddy is not running.')
 		end
 	elseif #arg == 1 and arg[1]:lower() == 'help' then
 		windower.add_to_chat(200, 'Available Options:')
-		windower.add_to_chat(200, '  //unm start - turns on UNM and starts trying to spawn')
-		windower.add_to_chat(200, '  //unm stop - turns off UNM')
+		windower.add_to_chat(200, '  //nb start - turns on NyzulBuddy and starts sending lamp packets')
+		windower.add_to_chat(200, '  //nb stop - turns off NyzulBuddy')
 	
-		windower.add_to_chat(200, '  //unm help - displays this text')
+		windower.add_to_chat(200, '  //nb help - displays this text')
 	end
 end
 
 
 
-windower.register_event('addon command', unm_command)
+windower.register_event('addon command', nb_command)
 windower.register_event('incoming text', function(new, old)
 	local info = windower.ffxi.get_info()
 	if not info.logged_in then
@@ -133,145 +149,86 @@ end)
 
 
 
+--Register and parse incoming 0x0E for relevant data
 
---parse entity update packets received 
 windower.register_event("incoming chunk", function(id, data)
-if id == 0x0E and mob_id == L1 then
-			new_text = {}
+if id == 0x0E  then
+			  new_text = {}
         local index  = {}
         local packet     = packets.parse('incoming', data)
         local mob_status = packet["Status"]
         local mob_id = packet["NPC"]
 		local mob_index  = packet["Index"]
-		 mob = windower.ffxi.get_mob_by_id(mob_id)
-		 distance = math.sqrt(mob.distance)
-		--local mob3 = windower.ffxi.get_mob_by_id(mob_id)
-		--local mob4 = windower.ffxi.get_mob_by_id(mob_id)
-		--local name = "Lamp"
-		 L1Index = 724
+			  mob = windower.ffxi.get_mob_by_id(mob_id)
+
 		
-		--local L3Index = 726
-		--local L4Index = 726
-	--	if mob.name == "Runic Lamp" and mob_index == 724  then -- and mob_index == 724 then
-	--	 new_text = mob.name .. ":  " .. (L1Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-		--				 .. mob2.name .. ":  " .. (L2Index) .. " ] is now idle; Distance: " .. math.ceil(distance2) .. " yalms. \n" 
-		--				 ..	mob3.name .. ":  " .. (L3Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-			--			 ..	mob4.name .. ":  " .. (L4Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-	--	windower.add_to_chat(179, mob.name .. ":  " .. (mob_index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms.")
-	  --  windower.add_to_chat(mob.name .. ":  " .. (mob_index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms.")
-				textDisplay()	 
-	
-	  
-end
-end)
-
-	windower.register_event("incoming chunk", function(id, data)
-if id == 0x0E and L2 then
-			
-        local index  = {}
-        local packet     = packets.parse('incoming', data)
-        local mob_status = packet["Status"]
-        local mob_id = packet["NPC"]
-		local mob_index  = packet["Index"]
-		 mob2 = windower.ffxi.get_mob_by_id(mob_id)
-		 distance2 = math.sqrt(mob2.distance)
-	--local mob3 = windower.ffxi.get_mob_by_id(mob_id)
-	--	local mob4 = windower.ffxi.get_mob_by_id(mob_id)
-		--local name = "Lamp"
-	
+	     L1Index = 724
 		 L2Index = 725
-	--	local L3Index = 726
-		--local L4Index = 726
-	--	if mob.name == "Runic Lamp" and mob_index == 725  then -- and mob_index == 724 then
-	--	 new_text = mob.name .. ":  " .. (L1Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-		--				 .. mob2.name .. ":  " .. (L2Index) .. " ] is now idle; Distance: " .. math.ceil(distance2) .. " yalms. \n" 
-		--				 ..	mob3.name .. ":  " .. (L3Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-		--				 ..	mob4.name .. ":  " .. (L4Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-	--	windower.add_to_chat(179, mob.name .. ":  " .. (mob_index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms.")
-	  --  windower.add_to_chat(mob.name .. ":  " .. (mob_index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms.")
-				textDisplay()		 
-	
-	  
-end
-end)
-   
- 
- 	windower.register_event("incoming chunk", function(id, data)
-if id == 0x0E and  L3 then
-			
-        local index  = {}
-        local packet     = packets.parse('incoming', data)
-        local mob_status = packet["Status"]
-        local mob_id = packet["NPC"]
-		local mob_index  = packet["Index"]
-		 mob3 = windower.ffxi.get_mob_by_id(mob_id)
-		 distance3 = math.sqrt(mob3.distance)
-	--local mob3 = windower.ffxi.get_mob_by_id(mob_id)
-	--	local mob4 = windower.ffxi.get_mob_by_id(mob_id)
-		--local name = "Lamp"
-	
-		-- L2Index = 725
 		 L3Index = 726
-		--local L4Index = 726
-		--if mob.name == "Runic Lamp" and mob_index == 726  then -- and mob_index == 724 then
-		-- new_text = mob.name .. ":  " .. (L1Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-		--				 .. mob2.name .. ":  " .. (L2Index) .. " ] is now idle; Distance: " .. math.ceil(distance2) .. " yalms. \n" 
-			--			 ..	mob3.name .. ":  " .. (L3Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-			--			 ..	mob4.name .. ":  " .. (L4Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-	--	windower.add_to_chat(179, mob.name .. ":  " .. (mob_index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms.")
-	  --  windower.add_to_chat(mob.name .. ":  " .. (mob_index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms.")
-					textDisplay()	 
-	
-	  
-end
-end)
-
- 	windower.register_event("incoming chunk", function(id, data)
-if id == 0x0E and L4 then
-			
-        local index  = {}
-        local packet     = packets.parse('incoming', data)
-        local mob_status = packet["Status"]
-        local mob_id = packet["NPC"]
-		local mob_index  = packet["Index"]
-		 mob4 = windower.ffxi.get_mob_by_id(mob_id)
-		 distance4 = math.sqrt(mob4.distance)
-	--local mob3 = windower.ffxi.get_mob_by_id(mob_id)
-	--	local mob4 = windower.ffxi.get_mob_by_id(mob_id)
-		--local name = "Lamp"
-	
-		-- L2Index = 725
 		 L4Index = 727
-		--local L4Index = 726
-		--if mob.name == "Runic Lamp" and mob_index == 726  then -- and mob_index == 724 then
-		-- new_text = mob.name .. ":  " .. (L1Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-		--				 .. mob2.name .. ":  " .. (L2Index) .. " ] is now idle; Distance: " .. math.ceil(distance2) .. " yalms. \n" 
-			--			 ..	mob3.name .. ":  " .. (L3Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-			--			 ..	mob4.name .. ":  " .. (L4Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-	--	windower.add_to_chat(179, mob.name .. ":  " .. (mob_index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms.")
-	  --  windower.add_to_chat(mob.name .. ":  " .. (mob_index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms.")
-					 textDisplay()	
+		 L5Index = 728
+		 L6Index = 729
+
+			if mob_index == 724 then
+			mob = windower.ffxi.get_mob_by_id(mob_id)
+			lamps[724] = mob
+			
+			elseif mob_index == 725 then
+			mob = windower.ffxi.get_mob_by_index(mob_index)
+			lamps[725] = mob
+			
+			elseif mob_index == 726 then
+			mob = windower.ffxi.get_mob_by_index(mob_index)
+			lamps[726] = mob 
+			
+			elseif mob_index == 727 then
+			mob = windower.ffxi.get_mob_by_index(mob_index)
+			lamps[727] = mob
+			
+					 
+		-- text_box:text(new_text)
+		-- text_box:visible(true)
+		 end
 	
+	
+	  
 	  
 end
 end)
---display lamps, IDs, distances 
-	function textDisplay()
-	 if mob.name == "Runic Lamp" then
 
-						 new_text = mob.name .. ":  " .. (L1Index) .. " ] is now idle; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-						 .. mob2.name .. ":  " .. (L2Index) .. " ] is now idle; Distance: " .. math.ceil(distance2) .. " yalms. \n" 
-						 ..	mob3.name .. ":  " .. (L3Index) .. " ] is now idle; Distance: " .. math.ceil(distance3) .. " yalms. \n" 
-						 ..	mob4.name .. ":  " .. (L4Index) .. " ] is now idle; Distance: " .. math.ceil(distance4) .. " yalms. \n" 
 
-				 text_box:text(new_text)
-				text_box:visible(true)
-				end
-				end
+
+	
+	function newText()
+
+		distance = math.sqrt(lamps[724].distance)
+		distance2 = math.sqrt(lamps[725].distance)
+		distance3 = math.sqrt(lamps[726].distance)
+		distance4 = math.sqrt(lamps[727].distance)
+			
+			new_text =
+			lamps[724].name .. "ID: [" .. (L1Index) .. "] exists; Distance: " .. math.ceil(distance) .. " yalms. \n" 
+		    .. lamps[725].name .. "ID:  [" .. (L2Index) .. "] exists; Distance: " .. math.ceil(distance2) .. " yalms. \n" 
+			.. lamps[726].name .. "ID:  [" .. (L3Index) .. "] exists; Distance: " .. math.ceil(distance3) .. " yalms. \n" 
+		    .. lamps[727].name .. "ID:  [" .. (L4Index) .. "] exists; Distance: " .. math.ceil(distance4) .. " yalms. \n" 
+					
+			text_box:text(new_text)
+			text_box:visible(true)
+	end
+   
+ windower.register_event('prerender', function()
+		newText()
+        
+    end)
+
 
 while(running == true) 
 do
   update()
   end
 
+  while(running == true)
+  do 
+  newText()
+  end
   
