@@ -45,7 +45,7 @@ text_box = texts.new(settings)
 	running = false
 	
 
-	
+--change to new floor message/exiting for running/not	
 
 function check_incoming_text(original)
 	local org = original:lower()
@@ -57,6 +57,7 @@ function check_incoming_text(original)
 		end
 end
 
+--requests entity update packets for Runic Lamps, need to add 0x2D8 and possibly 0x2D9 depending on max lamp spawns
 function update()
 
     if running == true then
@@ -90,7 +91,7 @@ function update()
 end
 
 end
-  
+  --command handler pasted from unm addon, needs to be updated/removed in favor of zone specific logic
     function unm_command(...)
 	if #arg > 3 then
 		windower.add_to_chat(167, 'Invalid command. //update help for valid options.')
@@ -133,7 +134,7 @@ end)
 
 
 
-
+--parse entity update packets received 
 windower.register_event("incoming chunk", function(id, data)
 if id == 0x0E and mob_id == L1 then
 			new_text = {}
@@ -254,7 +255,7 @@ if id == 0x0E and L4 then
 	  
 end
 end)
-
+--display lamps, IDs, distances 
 	function textDisplay()
 	 if mob.name == "Runic Lamp" then
 
