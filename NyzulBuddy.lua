@@ -93,12 +93,15 @@ function update()
 		local p4 = packets.new('outgoing', 0x016, {
 			['Target Index'] = L4
 			})
+		local p5 = packets.new('outgoing', 0x016, {
+			['Target Index'] = L5
+			})
 
   packets.inject(p)
   packets.inject(p2)
   packets.inject(p3)
   packets.inject(p4)
-
+  packets.inject(p5)
   coroutine.sleep(5)
   update()
   
@@ -184,6 +187,10 @@ if id == 0x0E  then
 			elseif mob_index == 727 then
 			mob = windower.ffxi.get_mob_by_index(mob_index)
 			lamps[727] = mob
+
+			elseif mob_index == 728 then
+			mob = windower.ffxi.get_mob_by_id(mob_id)
+			lamps[728] = mob
 			
 					 
 		-- text_box:text(new_text)
@@ -205,13 +212,14 @@ end)
 		distance2 = math.sqrt(lamps[725].distance)
 		distance3 = math.sqrt(lamps[726].distance)
 		distance4 = math.sqrt(lamps[727].distance)
+		distance5 = math.sqrt(lamps[728].distance)
 			
 			new_text =
 			lamps[724].name .. "ID: [" .. (L1Index) .. "] exists; Distance: " .. math.ceil(distance) .. " yalms. \n" 
 		    .. lamps[725].name .. "ID:  [" .. (L2Index) .. "] exists; Distance: " .. math.ceil(distance2) .. " yalms. \n" 
 			.. lamps[726].name .. "ID:  [" .. (L3Index) .. "] exists; Distance: " .. math.ceil(distance3) .. " yalms. \n" 
 		    .. lamps[727].name .. "ID:  [" .. (L4Index) .. "] exists; Distance: " .. math.ceil(distance4) .. " yalms. \n" 
-					
+			.. lamps[728].name .. "ID:  [" .. (L5Index) .. "] exists; Distance: " .. math.ceil(distance5) .. " yalms. \n" 		
 			text_box:text(new_text)
 			text_box:visible(true)
 	end
