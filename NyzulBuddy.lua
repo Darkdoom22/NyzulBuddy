@@ -47,6 +47,9 @@ lamps[726] = {}
 lamps[727] = {}
 lamps[728] = {} --728 and 729 are currently unused until I can acquire 5th lamp ID/Index.
 lamps[729] = {}
+lamps[730] = {}
+lamps[215] = {}
+
 		
 
 
@@ -72,13 +75,15 @@ end
 function update()
 
     if running == true then
-    ids    = {0x2D4, 0x2D5, 0x2D6, 0x2D7, 0x2D8, 0x2D9}
+    ids    = {0x2D4, 0x2D5, 0x2D6, 0x2D7, 0x2D8, 0x2D9, 0x2D2, 0x2D3, 0x150}
     L1 = 0x2D4
 	L2 = 0x2D5 
 	L3 = 0x2D6
 	L4 = 0x2D7
 	L5 = 0x2D8
-	
+	T1 = 0x2D2
+	T2 = 0x2D3
+	M1 = 0x10F
 
     
         local p = packets.new('outgoing', 0x016, {
@@ -96,12 +101,24 @@ function update()
 		local p5 = packets.new('outgoing', 0x016, {
 			['Target Index'] = L5
 			})
+		local p6 = packets.new('outgoing', 0x016, {
+			['Target Index'] = T1
+			})
+		local p7 = packets.new('outgoing', 0x016, {
+			['Target Index'] = T2
+			})
+	--	local p8 = packets.new('outgoing', 0x016, {
+	--		['Target Index'] = M1
+	--		})
 
   packets.inject(p)
   packets.inject(p2)
   packets.inject(p3)
   packets.inject(p4)
   packets.inject(p5)
+  packets.inject(p6)
+  packets.inject(p7)
+ -- packets.inject(p8)
   coroutine.sleep(5)
   update()
   
@@ -171,6 +188,9 @@ if id == 0x0E  then
 		 L4Index = 727
 		 L5Index = 728
 		 L6Index = 729
+		 T1Index = 722
+		 T2Index = 723
+	--	 M1Index = 271
 
 			if mob_index == 724 then
 			mob = windower.ffxi.get_mob_by_id(mob_id)
@@ -191,7 +211,18 @@ if id == 0x0E  then
 			elseif mob_index == 728 then
 			mob = windower.ffxi.get_mob_by_id(mob_id)
 			lamps[728] = mob
+
+			elseif mob_index == 722 then
+			mob = windower.ffxi.get_mob_by_index(mob_index)
+			lamps[729] = mob
 			
+			elseif mob_index == 723 then
+			mob = windower.ffxi.get_mob_by_index(mob_index)
+			lamps[730] = mob
+
+	--		elseif mob_index == 271 then
+	---		mob = windower.ffxi.get_mob_by_index(mob_index)
+	--		lamps[215] = mob
 					 
 		-- text_box:text(new_text)
 		-- text_box:visible(true)
@@ -208,25 +239,38 @@ end)
 	
 	function newText()
 
+		if lamps ~= nil then
+		coroutine.sleep(1)
+		
 		distance = math.sqrt(lamps[724].distance)
 		distance2 = math.sqrt(lamps[725].distance)
 		distance3 = math.sqrt(lamps[726].distance)
 		distance4 = math.sqrt(lamps[727].distance)
 		distance5 = math.sqrt(lamps[728].distance)
+		distance6 = math.sqrt(lamps[729].distance)
+		distance7 = math.sqrt(lamps[730].distance)
+	--	distance8 = math.sqrt(lamps[215].distance)
+		
 			
+		
 			new_text =
-			lamps[724].name .. "ID: [" .. (L1Index) .. "] exists; Distance: " .. math.ceil(distance) .. " yalms. \n" 
-		    .. lamps[725].name .. "ID:  [" .. (L2Index) .. "] exists; Distance: " .. math.ceil(distance2) .. " yalms. \n" 
-			.. lamps[726].name .. "ID:  [" .. (L3Index) .. "] exists; Distance: " .. math.ceil(distance3) .. " yalms. \n" 
-		    .. lamps[727].name .. "ID:  [" .. (L4Index) .. "] exists; Distance: " .. math.ceil(distance4) .. " yalms. \n" 
-			.. lamps[728].name .. "ID:  [" .. (L5Index) .. "] exists; Distance: " .. math.ceil(distance5) .. " yalms. \n" 		
+			   lamps[724].name .. " ID: [" .. (L1Index) .. "] exists; Distance: " .. math.ceil(distance) .. " yalms. \n" 
+		    .. lamps[725].name .. " ID:  [" .. (L2Index) .. "] exists; Distance: " .. math.ceil(distance2) .. " yalms. \n" 
+			.. lamps[726].name .. " ID:  [" .. (L3Index) .. "] exists; Distance: " .. math.ceil(distance3) .. " yalms. \n" 
+		    .. lamps[727].name .. " ID:  [" .. (L4Index) .. "] exists; Distance: " .. math.ceil(distance4) .. " yalms. \n" 
+			.. lamps[728].name .. " ID:  [" .. (L5Index) .. "] exists; Distance: " .. math.ceil(distance5) .. " yalms. \n" 		
+			.. lamps[729].name .. " *EVEN FLOOR* ID:  [" .. (T1Index) .. "] exists; Distance: " .. math.ceil(distance6) .. " yalms. \n" 		
+			.. lamps[730].name .. " *ODD FLOOR* ID:  [" .. (T2Index) .. "] exists; Distance: " .. math.ceil(distance7) .. " yalms. \n" 	
+		--	.. lamps[215].name .. " *ODD FLOOR* ID:  [" .. (M1Index) .. "] exists; Distance: " .. math.ceil(distance8) .. " yalms. \n" 	
 			text_box:text(new_text)
 			text_box:visible(true)
 	end
-   
+   end
+
  windower.register_event('prerender', function()
+		if running == true then
 		newText()
-        
+        end
     end)
 
 
