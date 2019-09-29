@@ -45,10 +45,10 @@ lamps[724] = {}
 lamps[725] = {}
 lamps[726] = {}
 lamps[727] = {}
-lamps[728] = {} --728 and 729 are currently unused until I can acquire 5th lamp ID/Index.
+lamps[728] = {} 
 lamps[729] = {}
 lamps[730] = {}
-lamps[215] = {}
+-- lamps[215] = {}
 
 		
 
